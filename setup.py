@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+Setup for the APRS Gate Module.
+
+Source:: https://github.com/ampledata/aprsgate
+"""
+
+import os
+import setuptools
+import sys
+
+__title__ = 'aprsgate'
+__version__ = '0.0.1b1'
+__author__ = 'Greg Albrecht W2GMD <oss@undef.net>'
+__license__ = 'Apache License, Version 2.0'
+__copyright__ = 'Copyright 2016 Orion Labs, Inc.'
+
+
+def publish():
+    """Function for publishing package to pypi."""
+    if sys.argv[-1] == 'publish':
+        os.system('python setup.py sdist')
+        os.system('twine upload dist/*')
+        sys.exit()
+
+
+publish()
+
+
+setuptools.setup(
+    name='aprsgate',
+    version=__version__,
+    description='Python APRS Gateway.',
+    author='Greg Albrecht',
+    author_email='oss@undef.net',
+    packages=['aprsgate'],
+    package_data={'': ['LICENSE']},
+    license=open('LICENSE').read(),
+    long_description=open('README.rst').read(),
+    url='https://github.com/ampledata/aprsgate',
+    setup_requires=[
+      'coverage >= 3.7.1',
+      'httpretty >= 0.8.10',
+      'nose >= 1.3.7'
+    ],
+    install_requires=['aprs', 'pypredict'],
+    package_dir={'aprsgate': 'aprsgate'},
+    zip_safe=False,
+    include_package_data=True,
+    entry_points={
+        'console_scripts': [
+            'aprs_gate = aprsgate.cmd:aprs_gate',
+            'sat_gate = aprsgate.cmd:sat_gate',
+        ]
+    }
+)
