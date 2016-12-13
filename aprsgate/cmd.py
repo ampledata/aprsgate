@@ -4,49 +4,49 @@
 """Python APRS Gateway Commands."""
 
 import argparse
-import logging
-import logging.handlers
-import Queue
 import time
 
 import aprs
+import redis
+
 import aprsgate
-import aprsgate.sat
 
 __author__ = 'Greg Albrecht W2GMD <oss@undef.net>'
 __copyright__ = 'Copyright 2016 Orion Labs, Inc.'
 __license__ = 'All rights reserved. Do not redistribute.'
 
 
-def setup_logging(log_level=None):
-    """
-    Sets up logging.
+def start_aprsgate(aprsc, callsign, redis_server, tag):
+    gate_in_channels = ['_'.join(['GateIn', callsign, tag])]
+    gate_out_channels = ['_'.join(['GateOut', callsign, tag])]
 
-    :param log_level: Log level to setup.
-    :type param: `logger` level.
-    :returns: logger instance
-    :rtype: instance
-    """
-    log_level = log_level or aprsgate.LOG_LEVEL
+    redis_conn = redis.StrictRedis(redis_server)
 
-    logger = logging.getLogger(__name__)
-    logger.setLevel(log_level)
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(log_level)
-    console_handler.setFormatter(aprsgate.LOG_FORMAT)
-    logger.addHandler(console_handler)
-    logger.propagate = False
+    thread_pool = []
 
-    return logger
+    thread_pool.append(
+        aprsgate.GateIn(aprsc, redis_conn, gate_in_channels))
+
+    thread_pool.append(
+        aprsgate.GateOut(aprsc, redis_conn, gate_out_channels))
+
+    try:
+        aprsc.start()
+
+        [th.start() for th in thread_pool]
+
+        while [th.is_alive() for th in thread_pool]:
+            time.sleep(0.01)
+
+    except KeyboardInterrupt:
+        [th.stop() for th in thread_pool]
+    finally:
+        [th.stop() for th in thread_pool]
 
 
-def sat_gate():
-    """Tracker Command Line interface for APRS."""
-
+def aprsgate_tcp():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '-d', '--debug', help='Enable debug logging', action='store_true'
-    )
+
     parser.add_argument(
         '-c', '--callsign', help='callsign', required=True
     )
@@ -54,78 +54,85 @@ def sat_gate():
         '-p', '--passcode', help='passcode', required=True
     )
     parser.add_argument(
-        '-P', '--port', help='port', default=8001
+        '-r', '--redis_server', help='Redis Server', required=True
     )
     parser.add_argument(
-        '-S', '--speed', help='speed', required=True
+        '-f', '--aprs_filter', help='Filter', required=False,
+        default='p/RS0ISS* u/ARISS/RS0ISS'
     )
     parser.add_argument(
-        '-i', '--interval', help='interval', default=60
-    )
-    parser.add_argument(
-        '-u', '--ssid', help='ssid', default='6'
-    )
-    parser.add_argument(
-        '-T', '--tle', help='TLE', default=aprsgate.ISS_TLE
-    )
-    parser.add_argument(
-        '-Q', '--qth', help='QTH', default=aprsgate.QTH
+        '-T', '--tag', help='Gate Tag', required=False, default='IGATE'
     )
 
     opts = parser.parse_args()
 
-    if opts.debug:
-        log_level = logging.DEBUG
-    else:
-        log_level = None
+    aprsc = aprs.TCPAPRS(
+        opts.callsign,
+        opts.passcode,
+        aprs_filter=opts.aprs_filter
+    )
 
-    logger = setup_logging(log_level)
+    start_aprsgate(aprsc, opts.callsign, opts.redis_server, opts.tag)
 
-    aprs_serial_int = aprs.APRSSerialKISS(port=opts.port, speed=opts.speed)
-    aprs_tcp_int = aprs.TCPAPRS(opts.callsign, opts.passcode)
 
-    queue1 = Queue.Queue()
-    queue2 = Queue.Queue()
+def aprsgate_serial():
+    parser = argparse.ArgumentParser()
 
-    beacon_frame = 'SUNSET>BEACON:>W2GMD Experimental Python APRS Gateway.'
-    sat_frame = 'SUNSET>CQ,ARISS:!3745.60N/12229.85W`W2GMD Experimental Python APRS Gateway CM87ss'
+    parser.add_argument(
+        '-c', '--callsign', help='callsign', required=True
+    )
+    parser.add_argument(
+        '-r', '--redis_server', help='Redis Server', required=True
+    )
+    parser.add_argument(
+        '-s', '--serial_port', help='Serial Port', required=True
+    )
+    parser.add_argument(
+        '-S', '--speed', help='speed', required=False, default=19200
+    )
+    parser.add_argument(
+        '-T', '--tag', help='Gate Tag', required=False, default='IGATE'
+    )
 
-    sat_beacon1 = aprsgate.sat.SatBeacon(
-        queue1, tle=opts.tle, qth=opts.qth, frame=sat_frame)
-    gate_out1 = aprsgate.GateOut(queue1, aprs_serial_int)
+    opts = parser.parse_args()
 
-    gate_in2 = aprsgate.GateIn(queue2, aprs_serial_int)
-    beacon2 = aprsgate.Beacon(queue2, beacon_frame)
-    gate_out2 = aprsgate.GateOut(queue2, aprs_tcp_int)
+    aprsc = aprs.APRSSerialKISS(opts.serial_port, opts.speed)
+    start_aprsgate(aprsc, opts.callsign, opts.redis_server, opts.tag)
+
+
+def aprsgate_worker():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        '-c', '--callsign', help='callsign', required=True
+    )
+    parser.add_argument(
+        '-r', '--redis_server', help='Redis Server', required=True
+    )
+    parser.add_argument(
+        '-T', '--tag', help='Gate Tag', required=False, default='IGATE'
+    )
+
+    opts = parser.parse_args()
+
+    gate_in_channels = ['_'.join(['GateIn', opts.callsign, opts.tag])]
+    gate_out_channels = ['_'.join(['GateOut', opts.callsign, opts.tag])]
+
+    redis_conn = redis.StrictRedis(opts.redis_server)
+
+    worker = aprsgate.GateWorker(
+        redis_conn,
+        in_channels=gate_in_channels,
+        out_channels=gate_out_channels
+    )
 
     try:
-        sat_beacon1.start()
-        gate_out1.start()
+        worker.sart()
 
-        gate_in2.start()
-        beacon2.start()
-        gate_out2.start()
-
-        queue1.join()
-        queue2.join()
-
-        while (sat_beacon1.is_alive() and gate_out1.is_alive() and
-               gate_in2.is_alive() and beacon2.is_alive() and
-               gate_out2.is_alive()):
+        while worker.is_alive():
             time.sleep(0.01)
 
     except KeyboardInterrupt:
-        sat_beacon1.stop()
-        gate_out1.stop()
-
-        gate_in2.stop()
-        beacon2.stop()
-        gate_out2.stop()
-
+        worker.stop()
     finally:
-        sat_beacon1.stop()
-        gate_out1.stop()
-
-        gate_in2.stop()
-        beacon2.stop()
-        gate_out2.stop()
+        worker.stop()

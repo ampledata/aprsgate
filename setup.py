@@ -51,8 +51,10 @@ setuptools.setup(
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'aprs_gate = aprsgate.cmd:aprs_gate',
-            'sat_gate = aprsgate.cmd:sat_gate',
+            'aprsgate_tcp = aprsgate.cmd:aprsgate_tcp',
+            'aprsgate_serial = aprsgate.cmd:aprsgate_serial',
+            'aprsgate_worker = aprsgate.cmd:aprsgate_worker'
+
         ]
     }
 )
