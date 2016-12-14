@@ -87,6 +87,7 @@ class GateOut(threading.Thread):
         self.aprsc = aprsc
         self.redis_conn = redis_conn
         self.channels = channels
+
         self.pubsub = None
         self.daemon = True
 
@@ -105,6 +106,11 @@ class GateOut(threading.Thread):
         if message.get('type') == 'message' and message.get('data'):
             message_data = message['data']
             aprs_frame = aprs.Frame(message_data)
+
+            # Use the ',I' construct for APRS-IS:
+            if self.aprsc.use_i_construct:
+                aprs_frame.path.append('I')
+
             self._logger.info('Sending aprs_frame="%s"', aprs_frame)
             self.aprsc.send(aprs_frame)
 
@@ -161,6 +167,7 @@ class GateWorker(threading.Thread):
 
             if aprsgate.reject_frame(aprs_frame):
                 return
+
             for channel in self.out_channels:
                 gate_dir, gate_id, gate_tag = channel.split('_')
 
