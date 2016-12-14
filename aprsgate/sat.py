@@ -36,7 +36,7 @@ class SatBeacon(threading.Thread):
 
         self.redis_conn = redis_conn
         self.channels = channels
-        self.aprs_frame = aprs.APRSFrame(frame)
+        self.aprs_frame = aprs.Frame(frame)
         self.interval = interval
         self.tle = tle
         self.qth = qth
