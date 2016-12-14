@@ -240,7 +240,7 @@ def aprsgate_satbeacon():
         '-T', '--TLE', help='TLE', required=False, default=aprsgate.ISS_TLE,
     )
     parser.add_argument(
-        '-Q', '--TLE', help='QTH', required=False, default=aprsgate.QTG,
+        '-Q', '--TLE', help='QTH', required=False, default=aprsgate.QTH,
     )
 
     opts = parser.parse_args()
