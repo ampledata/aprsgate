@@ -237,10 +237,10 @@ def aprsgate_satbeacon():
         type=int
     )
     parser.add_argument(
-        '-T', '--TLE', help='TLE', required=False, default=aprsgate.ISS_TLE,
+        '-T', '--tle', help='TLE', required=False, default=aprsgate.ISS_TLE,
     )
     parser.add_argument(
-        '-Q', '--QTH', help='QTH', required=False, default=aprsgate.QTH,
+        '-Q', '--qth', help='QTH', required=False, default=aprsgate.QTH,
     )
 
     opts = parser.parse_args()
@@ -254,8 +254,8 @@ def aprsgate_satbeacon():
         channels=gate_out_channels,
         frame=opts.frame,
         interval=opts.interval,
-        qth=opts.qth,
-        tle=opts.tle
+        tle=opts.tle,
+        qth=opts.qth
     )
 
     try:
