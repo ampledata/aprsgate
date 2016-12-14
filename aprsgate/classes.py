@@ -173,7 +173,7 @@ class GateWorker(threading.Thread):
 
                 # Don't re-gate my own frames. (anti-loop)
                 for frame_path in aprs_frame.path:
-                    if gate_id in frame_path.to_s():
+                    if gate_id in str(frame_path):
                         return
 
                 aprs_frame.path.append(aprs.Callsign(gate_id))
