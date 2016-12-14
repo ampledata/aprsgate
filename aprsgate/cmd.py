@@ -170,7 +170,7 @@ def aprsgate_worker():
         worker.stop()
 
 
-def aprs_beacon():
+def aprsgate_beacon():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -196,7 +196,7 @@ def aprs_beacon():
 
     redis_conn = redis.StrictRedis(opts.redis_server)
 
-    beacon = aprsgate.Beacon(
+    beacon = aprsgate.GateBeacon(
         redis_conn,
         channels=gate_out_channels,
         frame=opts.frame,

@@ -191,7 +191,7 @@ class GateWorker(threading.Thread):
                 self.handle_message(message)
 
 
-class Beacon(threading.Thread):
+class GateBeacon(threading.Thread):
 
     """Beacon"""
 
