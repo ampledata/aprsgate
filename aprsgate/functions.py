@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Python APRS Gateway Functions."""
+"""Python APRS Gateway Functions Definitions."""
 
 import aprsgate
 
@@ -11,6 +11,9 @@ __license__ = 'All rights reserved. Do not redistribute.'
 
 
 def reject_frame(aprs_frame):
+    """
+    Determines if a frame should be rejected.
+    """
     if aprsgate.REJECT_PATHS.intersection(aprs_frame.path):
         print 'Rejecting Path "%s"', aprs_frame.path
         return True

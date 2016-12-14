@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-Constants for Python APRS Gateway.
-"""
+"""Python APRS Gateway Constants."""
 
 import logging
 

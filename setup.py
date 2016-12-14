@@ -45,7 +45,7 @@ setuptools.setup(
       'httpretty >= 0.8.10',
       'nose >= 1.3.7'
     ],
-    install_requires=['aprs', 'pypredict'],
+    install_requires=['aprs >= 6.0.0', 'kiss >= 5.0.0'],
     package_dir={'aprsgate': 'aprsgate'},
     zip_safe=False,
     include_package_data=True,
@@ -58,5 +58,9 @@ setuptools.setup(
             'aprsgate_beacon = aprsgate.cmd:aprsgate_beacon',
             'aprsgate_satbeacon = aprsgate.cmd:aprsgate_satbeacon'
         ]
+    },
+    extras_require={
+        'satgate': ['pypredict'],
+        '_all': ['satgate']
     }
 )

@@ -15,10 +15,9 @@ Python APRS Gateway.
 
 """
 
-from .constants import (LOG_FORMAT, LOG_LEVEL, ISS_TLE, BEACON_INTERVAL, QTH,  # NOQA
-                        REJECT_PATHS)
+from .constants import (LOG_FORMAT, LOG_LEVEL, ISS_TLE, BEACON_INTERVAL,  # NOQA
+                        QTH, REJECT_PATHS)
 
 from .functions import reject_frame  # NOQA
 
 from .classes import GateOut, GateIn, GateWorker, GateBeacon # NOQA
-from .sat import SatBeacon # NOQA

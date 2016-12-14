@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""APRS Class Definitions"""
+"""Python APRS Gateway Class Definitions."""
 
 import logging
 import logging.handlers
@@ -54,7 +54,7 @@ class GateIn(threading.Thread):
 
     def handle_message(self, message):
         for channel in self.channels:
-            aprs_frame = aprs.APRSFrame(message)
+            aprs_frame = aprs.Frame(message)
             self._logger.debug(
                 'Publishing to channel=%s aprs_frame="%s"',
                 channel, aprs_frame)
@@ -104,7 +104,7 @@ class GateOut(threading.Thread):
         self._logger.debug('Handling message="%s"', message)
         if message.get('type') == 'message' and message.get('data'):
             message_data = message['data']
-            aprs_frame = aprs.APRSFrame(message_data)
+            aprs_frame = aprs.Frame(message_data)
             self._logger.info('Sending aprs_frame="%s"', aprs_frame)
             self.aprsc.send(aprs_frame)
 
@@ -157,7 +157,7 @@ class GateWorker(threading.Thread):
         self._logger.debug('Handling message="%s"', message)
         if message.get('type') == 'message' and message.get('data'):
             message_data = message['data']
-            aprs_frame = aprs.APRSFrame(message_data)
+            aprs_frame = aprs.Frame(message_data)
 
             if aprsgate.reject_frame(aprs_frame):
                 return
@@ -209,7 +209,7 @@ class GateBeacon(threading.Thread):
 
         self.redis_conn = redis_conn
         self.channels = channels
-        self.aprs_frame = aprs.APRSFrame(frame)
+        self.aprs_frame = aprs.Frame(frame)
         self.interval = interval
 
         self.pubsub = None

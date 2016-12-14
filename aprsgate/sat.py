@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""APRS Class Definitions"""
+"""Python APRS Gateway Satellite Class Definitions."""
 
 import logging
 import logging.handlers

@@ -67,7 +67,7 @@ def aprsgate_tcp():
 
     opts = parser.parse_args()
 
-    aprsc = aprs.TCPAPRS(
+    aprsc = aprs.TCP(
         opts.callsign,
         opts.passcode,
         aprs_filter=opts.aprs_filter
@@ -98,7 +98,7 @@ def aprsgate_kiss_serial():
 
     opts = parser.parse_args()
 
-    aprsc = aprs.APRSSerialKISS(opts.serial_port, opts.speed)
+    aprsc = aprs.SerialKISS(opts.serial_port, opts.speed)
     start_aprsgate(aprsc, opts.callsign, opts.redis_server, opts.tag)
 
 
@@ -124,7 +124,7 @@ def aprsgate_kiss_tcp():
 
     opts = parser.parse_args()
 
-    aprsc = aprs.APRSTCPKISS(
+    aprsc = aprs.TCPKISS(
         opts.host,
         opts.port
     )
@@ -217,6 +217,8 @@ def aprsgate_beacon():
 
 
 def aprsgate_satbeacon():
+    from aprsgate.sat import SatBeacon
+
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
