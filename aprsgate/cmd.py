@@ -62,7 +62,7 @@ def aprsgate_tcp():
     )
     parser.add_argument(
         '-f', '--aprs_filter', help='Filter', required=False,
-        default='p/RS0ISS* u/ARISS/RS0ISS'
+        default='p/RS0ISS u/ARISS/RS0ISS'
     )
 
     opts = parser.parse_args()
