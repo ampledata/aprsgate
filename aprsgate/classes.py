@@ -6,6 +6,7 @@
 import logging
 import logging.handlers
 import threading
+import time
 
 import aprs
 import aprsgate
@@ -67,6 +68,10 @@ class GateIn(threading.Thread):
 
 class GateOut(threading.Thread):
 
+    """
+    Accepts APRS Fames from an PubSub and transmits them.
+    """
+
     _logger = logging.getLogger(__name__)
     if not _logger.handlers:
         _logger.setLevel(aprsgate.LOG_LEVEL)
@@ -117,6 +122,8 @@ class GateOut(threading.Thread):
 
 class GateWorker(threading.Thread):
 
+    """worker"""
+
     _logger = logging.getLogger(__name__)
     if not _logger.handlers:
         _logger.setLevel(aprsgate.LOG_LEVEL)
@@ -132,6 +139,7 @@ class GateWorker(threading.Thread):
         self.redis_conn = redis_conn
         self.in_channels = in_channels
         self.out_channels = out_channels
+
         self.pubsub = None
         self.daemon = True
 
@@ -181,3 +189,51 @@ class GateWorker(threading.Thread):
         while not self.stopped():
             for message in self.pubsub.listen():
                 self.handle_message(message)
+
+
+class Beacon(threading.Thread):
+
+    """Beacon"""
+
+    _logger = logging.getLogger(__name__)
+    if not _logger.handlers:
+        _logger.setLevel(aprsgate.LOG_LEVEL)
+        _console_handler = logging.StreamHandler()
+        _console_handler.setLevel(aprsgate.LOG_LEVEL)
+        _console_handler.setFormatter(aprsgate.LOG_FORMAT)
+        _logger.addHandler(_console_handler)
+        _logger.propagate = False
+
+    def __init__(self, redis_conn, channels, frame, interval):
+        threading.Thread.__init__(self)
+
+        self.redis_conn = redis_conn
+        self.channels = channels
+        self.aprs_frame = aprs.APRSFrame(frame)
+        self.interval = interval
+
+        self.pubsub = None
+        self.daemon = True
+
+        self._stop = threading.Event()
+
+    def stop(self):
+        """Stop the thread at the next opportunity."""
+        self._stop.set()
+
+    def stopped(self):
+        """Checks if the thread is stopped."""
+        return self._stop.isSet()
+
+    def send_beacon(self):
+        for channel in self.channels:
+            self._logger.debug(
+                'Publishing to channel=%s aprs_frame="%s"',
+                channel, self.aprs_frame)
+            self.redis_conn.publish(channel, self.aprs_frame)
+
+    def run(self):
+        self._logger.info('Running %s', self)
+        while not self.stopped():
+            self.send_beacon()
+            time.sleep(self.interval)

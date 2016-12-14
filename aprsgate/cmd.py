@@ -168,3 +168,48 @@ def aprsgate_worker():
         worker.stop()
     finally:
         worker.stop()
+
+
+def aprs_beacon():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        '-c', '--callsign', help='callsign', required=True
+    )
+    parser.add_argument(
+        '-r', '--redis_server', help='Redis Server', required=True
+    )
+    parser.add_argument(
+        '-t', '--tag', help='Gate Tag', required=False, default='IGATE'
+    )
+
+    parser.add_argument(
+        '-f', '--frame', help='Frame', required=True
+    )
+    parser.add_argument(
+        '-i', '--interval', help='Interval', required=False, default=60
+    )
+
+    opts = parser.parse_args()
+
+    gate_out_channels = ['_'.join(['GateOut', opts.callsign, opts.tag])]
+
+    redis_conn = redis.StrictRedis(opts.redis_server)
+
+    beacon = aprsgate.Beacon(
+        redis_conn,
+        channels=gate_out_channels,
+        frame=opts.frame,
+        interval=opts.interval
+    )
+
+    try:
+        beacon.start()
+
+        while beacon.is_alive():
+            time.sleep(0.01)
+
+    except KeyboardInterrupt:
+        beacon.stop()
+    finally:
+        beacon.stop()
