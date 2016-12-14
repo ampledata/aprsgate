@@ -8,6 +8,7 @@ import logging.handlers
 import threading
 import time
 
+import aprs
 import aprsgate
 
 import predict
@@ -19,6 +20,8 @@ __copyright__ = 'Copyright 2016 Orion Labs, Inc.'
 
 class SatBeacon(threading.Thread):
 
+    """SatBeacon"""
+
     _logger = logging.getLogger(__name__)
     if not _logger.handlers:
         _logger.setLevel(aprsgate.LOG_LEVEL)
@@ -28,17 +31,19 @@ class SatBeacon(threading.Thread):
         _logger.addHandler(_console_handler)
         _logger.propagate = False
 
-    def __init__(self, redis_conn, channels, tle, qth, frame, interval=60):
+    def __init__(self, redis_conn, channels, frame, interval, tle, qth):
         threading.Thread.__init__(self)
+
         self.redis_conn = redis_conn
         self.channels = channels
-
+        self.aprs_frame = aprs.APRSFrame(frame)
+        self.interval = interval
         self.tle = tle
         self.qth = qth
-        self.frame = frame
-        self.interval = interval
 
+        self.pubsub = None
         self.daemon = True
+
         self._stop = threading.Event()
 
     def stop(self):
@@ -49,15 +54,15 @@ class SatBeacon(threading.Thread):
         """Checks if the thread is stopped."""
         return self._stop.isSet()
 
-    def handle_message(self, message):
+    def send_beacon(self):
         for channel in self.channels:
             self._logger.debug(
-                'Sending to channel=%s message="%s"', channel, message)
-            self.redis_conn.publish(channel, message)
+                'Publishing to channel=%s aprs_frame="%s"',
+                channel, self.aprs_frame)
+            self.redis_conn.publish(channel, self.aprs_frame)
 
     def run(self):
         self._logger.info('Running %s', self)
-
         while not self.stopped():
             passes = predict.transits(self.tle, self.qth)
             next_pass = passes.next()
@@ -67,6 +72,6 @@ class SatBeacon(threading.Thread):
             now = time.time()
 
             if now >= start and now <= end:
-                self.handle_message(self.frame)
+            self.send_beacon()
 
             time.sleep(self.interval)

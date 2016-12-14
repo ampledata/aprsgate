@@ -214,3 +214,57 @@ def aprsgate_beacon():
         beacon.stop()
     finally:
         beacon.stop()
+
+
+def aprsgate_satbeacon():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        '-c', '--callsign', help='callsign', required=True
+    )
+    parser.add_argument(
+        '-r', '--redis_server', help='Redis Server', required=True
+    )
+    parser.add_argument(
+        '-t', '--tag', help='Gate Tag', required=False, default='IGATE'
+    )
+
+    parser.add_argument(
+        '-f', '--frame', help='Frame', required=True
+    )
+    parser.add_argument(
+        '-i', '--interval', help='Interval', required=False, default=60,
+        type=int
+    )
+    parser.add_argument(
+        '-T', '--TLE', help='TLE', required=False, default=aprsgate.ISS_TLE,
+    )
+    parser.add_argument(
+        '-Q', '--TLE', help='QTH', required=False, default=aprsgate.QTG,
+    )
+
+    opts = parser.parse_args()
+
+    gate_out_channels = ['_'.join(['GateOut', opts.callsign, opts.tag])]
+
+    redis_conn = redis.StrictRedis(opts.redis_server)
+
+    beacon = aprsgate.SatBeacon(
+        redis_conn,
+        channels=gate_out_channels,
+        frame=opts.frame,
+        interval=opts.interval,
+        qth=opts.qth,
+        tle=opts.tle
+    )
+
+    try:
+        beacon.start()
+
+        while beacon.is_alive():
+            time.sleep(0.01)
+
+    except KeyboardInterrupt:
+        beacon.stop()
+    finally:
+        beacon.stop()
