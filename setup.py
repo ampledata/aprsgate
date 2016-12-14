@@ -55,7 +55,7 @@ setuptools.setup(
             'aprsgate_kiss_tcp = aprsgate.cmd:aprsgate_kiss_tcp',
             'aprsgate_kiss_serial = aprsgate.cmd:aprsgate_kiss_serial',
             'aprsgate_worker = aprsgate.cmd:aprsgate_worker',
-            'aprsgate_beacon = aprsgate.cmd:aprsgate_beacon'
+            'aprsgate_beacon = aprsgate.cmd:aprsgate_beacon',
             'aprsgate_satbeacon = aprsgate.cmd:aprsgate_satbeacon'
         ]
     }
