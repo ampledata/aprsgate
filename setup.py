@@ -30,25 +30,25 @@ publish()
 
 
 setuptools.setup(
-    name='aprsgate',
+    name=__title__,
     version=__version__,
     description='Python APRS Gateway.',
     author='Greg Albrecht',
     author_email='oss@undef.net',
     packages=['aprsgate'],
     package_data={'': ['LICENSE']},
+    package_dir={'aprsgate': 'aprsgate'},
     license=open('LICENSE').read(),
     long_description=open('README.rst').read(),
     url='https://github.com/ampledata/aprsgate',
+    zip_safe=False,
+    include_package_data=True,
     setup_requires=[
       'coverage >= 3.7.1',
       'httpretty >= 0.8.10',
       'nose >= 1.3.7'
     ],
-    install_requires=['aprs >= 6.0.0', 'kiss >= 5.0.0'],
-    package_dir={'aprsgate': 'aprsgate'},
-    zip_safe=False,
-    include_package_data=True,
+    install_requires=['aprs >= 6.0.0', 'kiss >= 6.0.0'],
     entry_points={
         'console_scripts': [
             'aprsgate_tcp = aprsgate.cmd:aprsgate_tcp',
@@ -62,5 +62,13 @@ setuptools.setup(
     extras_require={
         'satgate': ['pypredict'],
         '_all': ['satgate']
-    }
+    },
+    classifiers=[
+        'Topic :: Communications :: Ham Radio',
+        'Programming Language :: Python',
+        'License :: OSI Approved :: Apache Software License'
+    ],
+    keywords=[
+        'Ham Radio', 'APRS', 'KISS'
+    ]
 )
