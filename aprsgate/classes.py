@@ -62,7 +62,7 @@ class GateIn(threading.Thread):
     def run(self):
         self._logger.info('Running %s', self)
         while not self.stopped():
-            self.aprsc.read(callback=self.handle_message)
+            self.aprsc.receive(callback=self.handle_message)
 
 
 class GateOut(threading.Thread):
