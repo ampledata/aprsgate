@@ -187,7 +187,8 @@ def aprsgate_beacon():
         '-f', '--frame', help='Frame', required=True
     )
     parser.add_argument(
-        '-i', '--interval', help='Interval', required=False, default=60
+        '-i', '--interval', help='Interval', required=False, default=60,
+        type=int
     )
 
     opts = parser.parse_args()
