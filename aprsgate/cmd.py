@@ -51,17 +51,18 @@ def aprsgate_tcp():
         '-c', '--callsign', help='callsign', required=True
     )
     parser.add_argument(
-        '-p', '--passcode', help='passcode', required=True
+        '-r', '--redis_server', help='Redis Server', required=True
     )
     parser.add_argument(
-        '-r', '--redis_server', help='Redis Server', required=True
+        '-t', '--tag', help='Gate Tag', required=False, default='IGATE'
+    )
+
+    parser.add_argument(
+        '-p', '--passcode', help='passcode', required=True
     )
     parser.add_argument(
         '-f', '--aprs_filter', help='Filter', required=False,
         default='p/RS0ISS* u/ARISS/RS0ISS'
-    )
-    parser.add_argument(
-        '-T', '--tag', help='Gate Tag', required=False, default='IGATE'
     )
 
     opts = parser.parse_args()
@@ -75,7 +76,7 @@ def aprsgate_tcp():
     start_aprsgate(aprsc, opts.callsign, opts.redis_server, opts.tag)
 
 
-def aprsgate_serial():
+def aprsgate_kiss_serial():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -85,18 +86,49 @@ def aprsgate_serial():
         '-r', '--redis_server', help='Redis Server', required=True
     )
     parser.add_argument(
+        '-t', '--tag', help='Gate Tag', required=False, default='IGATE'
+    )
+
+    parser.add_argument(
         '-s', '--serial_port', help='Serial Port', required=True
     )
     parser.add_argument(
         '-S', '--speed', help='speed', required=False, default=19200
     )
-    parser.add_argument(
-        '-T', '--tag', help='Gate Tag', required=False, default='IGATE'
-    )
 
     opts = parser.parse_args()
 
     aprsc = aprs.APRSSerialKISS(opts.serial_port, opts.speed)
+    start_aprsgate(aprsc, opts.callsign, opts.redis_server, opts.tag)
+
+
+def aprsgate_kiss_tcp():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        '-c', '--callsign', help='callsign', required=True
+    )
+    parser.add_argument(
+        '-r', '--redis_server', help='Redis Server', required=True
+    )
+    parser.add_argument(
+        '-t', '--tag', help='Gate Tag', required=False, default='IGATE'
+    )
+
+    parser.add_argument(
+        '-H', '--host', help='Host', required=True
+    )
+    parser.add_argument(
+        '-P', '--port', help='TCP Port', required=False, default=8001
+    )
+
+    opts = parser.parse_args()
+
+    aprsc = aprs.APRSTCPKISS(
+        opts.host,
+        opts.port
+    )
+
     start_aprsgate(aprsc, opts.callsign, opts.redis_server, opts.tag)
 
 

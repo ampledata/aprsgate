@@ -52,7 +52,8 @@ setuptools.setup(
     entry_points={
         'console_scripts': [
             'aprsgate_tcp = aprsgate.cmd:aprsgate_tcp',
-            'aprsgate_serial = aprsgate.cmd:aprsgate_serial',
+            'aprsgate_kiss_tcp = aprsgate.cmd:aprsgate_kiss_tcp',
+            'aprsgate_kiss_serial = aprsgate.cmd:aprsgate_kiss_serial',
             'aprsgate_worker = aprsgate.cmd:aprsgate_worker'
 
         ]
