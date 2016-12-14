@@ -153,13 +153,20 @@ class GateWorker(threading.Thread):
 
             if aprsgate.reject_frame(aprs_frame):
                 return
-
             for channel in self.out_channels:
                 gate_dir, gate_id, gate_tag = channel.split('_')
+
+                # Don't re-gate my own frames. (anti-loop)
+                for frame_path in aprs_frame.path:
+                    if gate_id in frame_path.to_s():
+                        return
+
                 aprs_frame.path.append(aprs.Callsign(gate_id))
+
                 self._logger.debug(
                     'Sending to channel=%s frame="%s"',
                     channel, aprs_frame)
+
                 self.redis_conn.publish(channel, aprs_frame)
 
     def run(self):
