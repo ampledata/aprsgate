@@ -72,6 +72,6 @@ class SatBeacon(threading.Thread):
             now = time.time()
 
             if now >= start and now <= end:
-            self.send_beacon()
+                self.send_beacon()
 
             time.sleep(self.interval)
