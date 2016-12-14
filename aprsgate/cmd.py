@@ -193,7 +193,7 @@ def aprsgate_beacon():
 
     opts = parser.parse_args()
 
-    gate_out_channels = ['_'.join(['GateIn', opts.callsign, opts.tag])]
+    gate_out_channels = ['_'.join(['GateOut', opts.callsign, opts.tag])]
 
     redis_conn = redis.StrictRedis(opts.redis_server)
 
@@ -251,7 +251,7 @@ def aprsgate_satbeacon():
 
     redis_conn = redis.StrictRedis(opts.redis_server)
 
-    beacon = aprsgate.SatBeacon(
+    beacon = SatBeacon(
         redis_conn,
         channels=gate_out_channels,
         frame=opts.frame,
