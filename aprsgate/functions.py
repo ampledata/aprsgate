@@ -19,7 +19,7 @@ def reject_frame(aprs_frame):
         return True
 
     for frame_path in aprs_frame.path:
-        if frame_path.startswith('q'):
+        if frame_path.to_s().startswith('q'):
             print 'Rejecting q "%s"', frame_path
             return True
 

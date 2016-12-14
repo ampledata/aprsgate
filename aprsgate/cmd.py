@@ -142,7 +142,7 @@ def aprsgate_worker():
         '-r', '--redis_server', help='Redis Server', required=True
     )
     parser.add_argument(
-        '-T', '--tag', help='Gate Tag', required=False, default='IGATE'
+        '-t', '--tag', help='Gate Tag', required=False, default='IGATE'
     )
 
     opts = parser.parse_args()
@@ -159,7 +159,7 @@ def aprsgate_worker():
     )
 
     try:
-        worker.sart()
+        worker.start()
 
         while worker.is_alive():
             time.sleep(0.01)

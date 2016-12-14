@@ -167,6 +167,8 @@ class GateWorker(threading.Thread):
         self.pubsub = self.redis_conn.pubsub()
         self._logger.info(
             'Subscribing to in_channels="%s"', self.in_channels)
+        self._logger.info(
+            'Publishing to out_channels="%s"', self.out_channels)
         self.pubsub.subscribe(self.in_channels)
 
         while not self.stopped():
